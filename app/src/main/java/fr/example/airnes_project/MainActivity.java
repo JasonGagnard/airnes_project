@@ -1,4 +1,3 @@
-
 package fr.example.airnes_project;
 
 import android.os.Bundle;
