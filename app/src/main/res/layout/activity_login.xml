@@ -60,7 +60,7 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/mdplogin"
+        app:layout_constraintTop_toBottomOf="@id/mdp_login"
         app:layout_constraintWidth_percent="0.7" />
 
     <TextView

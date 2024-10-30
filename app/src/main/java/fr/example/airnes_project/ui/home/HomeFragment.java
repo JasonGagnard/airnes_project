@@ -10,28 +10,22 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import java.util.List;
+
+import fr.example.airnes_project.R;
+import fr.example.airnes_project.adapters.PopularAdapters;
 import fr.example.airnes_project.databinding.FragmentHomeBinding;
+import fr.example.airnes_project.models.PopularModel;
 
 public class HomeFragment extends Fragment {
 
     private FragmentHomeBinding binding;
 
+    List<PopularModel> PopularModelList;
+    PopularAdapters popularAdapters;
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        HomeViewModel homeViewModel =
-                new ViewModelProvider(this).get(HomeViewModel.class);
-
-        binding = FragmentHomeBinding.inflate(inflater, container, false);
-        View root = binding.getRoot();
-
-        final TextView textView = binding.textHome;
-        homeViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
-        return root;
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        binding = null;
+        View root = inflater.inflate(R.layout.fragment_home, container,false);
+    return root;
     }
 }

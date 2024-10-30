@@ -1,10 +1,12 @@
 package fr.example.airnes_project.ui;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -12,34 +14,41 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.FirebaseDatabase;
+
 import fr.example.airnes_project.R;
+import fr.example.airnes_project.models.UserModel;
 
 public class RegisterActivity extends AppCompatActivity {
     Button signUP;
-    EditText prenom,nom,email,motdepasse,telephone;
+    EditText name,nom,email,password,phone;
 
     TextView signIn;
 
-    ProgressBar progressBar;
+    FirebaseAuth auth;
+    FirebaseDatabase database;
 
-    DatabaseHelper db;
+
 
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
-
+        auth = FirebaseAuth.getInstance();
+        database = FirebaseDatabase.getInstance();
         signUP =findViewById(R.id.login_btn);
         nom =findViewById(R.id.nom_reg);
-        prenom =findViewById(R.id.prenom_reg);
+        name =findViewById(R.id.prenom_reg);
         email =findViewById(R.id.email_reg);
-        motdepasse =findViewById(R.id.motdepasse_reg);
-        telephone =findViewById(R.id.telephone_reg);
+        password =findViewById(R.id.motdepasse_reg);
+        phone =findViewById(R.id.telephone_reg);
         signIn = findViewById(R.id.sign_in);
 
-        progressBar = findViewById(R.id.progressbar);
-        progressBar.setVisibility(View.GONE);
 
 
 
@@ -51,41 +60,54 @@ public class RegisterActivity extends AppCompatActivity {
 
             }
         });
+
         signUP.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String userNom = nom.getText().toString();
-                String userPrenom = prenom.getText().toString();
-                String userEmail = email.getText().toString();
-                String userMotdepasse = motdepasse.getText().toString();
-                String userTelephone = telephone.getText().toString();
-
-                // Vérifier si tous les champs sont remplis
-                if (userNom.isEmpty() || userPrenom.isEmpty() || userEmail.isEmpty() || userMotdepasse.isEmpty() || userTelephone.isEmpty()) {
-                    Toast.makeText(RegisterActivity.this, "Veuillez remplir tous les champs", Toast.LENGTH_SHORT).show();
-                } else {
-                    // Vérifier si l'utilisateur existe déjà dans la base de données
-                    boolean userExists = db.checkUser(userEmail);
-
-                    if (userExists) {
-                        // Si l'utilisateur existe déjà, afficher un message d'erreur
-                        Toast.makeText(RegisterActivity.this, "Cet utilisateur existe déjà", Toast.LENGTH_SHORT).show();
-                    } else {
-                        // Si l'utilisateur est nouveau, l'ajouter dans la base de données
-                        boolean insertSuccess = db.insertUser(userNom, userPrenom, userEmail, userMotdepasse, userTelephone);
-
-                        if (insertSuccess) {
-                            // Si l'insertion est réussie, afficher un message de confirmation
-                            Toast.makeText(RegisterActivity.this, "Enregistré avec succès", Toast.LENGTH_SHORT).show();
-                            // Rediriger vers l'activité de connexion
-                            startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
-                        } else {
-                            // Si l'insertion échoue, afficher un message d'erreur
-                            Toast.makeText(RegisterActivity.this, "Échec de l'enregistrement", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                }
+                CreateUser();
             }
         });
+    }
+
+    private void CreateUser() {
+        String username = name.getText().toString();
+        String useremail = email.getText().toString();
+        String userpassword = password.getText().toString();
+
+        if (TextUtils.isEmpty(username)){
+            Toast.makeText(this,"remplir emplacement prénom", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (TextUtils.isEmpty(useremail)){
+            Toast.makeText(this,"remplir emplacement email", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (TextUtils.isEmpty(userpassword)){
+            Toast.makeText(this,"remplir emplacement mot de passe", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (userpassword.length() < 6){
+            Toast.makeText(this, "mot de passe trop court", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        auth.createUserWithEmailAndPassword(useremail,userpassword)
+                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()){
+
+                            UserModel userModel = new UserModel(username,useremail,userpassword);
+                                    String id = task.getResult().getUser().getUid();
+                                    database.getReference().child("Users").child(id).setValue(userModel);
+
+                            Toast.makeText(RegisterActivity.this, "Enregistrement réussi", Toast.LENGTH_SHORT).show();
+                        }
+                        else {
+                            Toast.makeText(RegisterActivity.this, "erreur"+task.getException(), Toast.LENGTH_SHORT).show();
+                        }
+
+
+                    }
+                });
     }
 }
