@@ -1,0 +1,1 @@
+Ce projet est une application de e-commerce développée avec Android Studio. Elle permet aux utilisateurs de naviguer, de rechercher des produits, de les ajouter à leur panier et de finaliser leur achat. Cette application est conçue pour offrir une expérience d'achat fluide et intuitive.
